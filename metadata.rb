@@ -1,0 +1,7 @@
+name             'concrete5'
+maintainer       'Atsushi Nakajyo'
+maintainer_email 'jyotti@gmail.com'
+license          'Apache 2.0'
+description      'Installs/Configures concrete5'
+long_description 'Installs/Configures concrete5'
+version          '0.1.0'
