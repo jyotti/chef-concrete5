@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'chef'
+gem 'knife-zero'
 gem 'berkshelf'
 
 # Uncomment these lines if you want to live on the Edge:

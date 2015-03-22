@@ -1,0 +1,55 @@
+server {
+  listen 80;
+  server_name _;
+  root /var/www/concrete5/web;
+  index index.php index.html index.htm;
+  #index index.html index.htm;
+  charset     utf-8;
+
+  access_log  /var/log/nginx/default.access.log  main;
+  error_log   /var/log/nginx/default.error.log;
+
+  set $mobile '';
+
+  # setting cache enabled...
+  set $no_cache 0;
+  if ($request_method != GET) {
+      set $no_cache 1;
+  }
+  if ($http_cookie ~* "CONCRETE5" ) {
+      set $no_cache 1;
+  }
+
+  location / {
+    try_files $uri $uri/ @concrete5;
+  }
+
+  location @concrete5 {
+    rewrite ^/(.*)$ /index.php/$1 last;
+    set $dbg_v "do rewrite";
+    access_log /var/log/nginx/debug.log debug;
+  }
+
+  #location ~ \.php$ {
+  location ~ \.php($|/) {
+    #internal;
+
+    set $dbg_v "proxy to backend";
+    access_log /var/log/nginx/debug.log debug;
+
+    proxy_no_cache     $no_cache;
+    proxy_cache_bypass $no_cache;
+
+    proxy_redirect     off;
+    proxy_cache        czone;
+    proxy_cache_key    "$scheme://$host$request_uri$mobile";
+    proxy_cache_valid  200 0m;
+    proxy_pass http://backend;
+
+    #include fastcgi_params;
+    #fastcgi_pass unix:/var/run/php5-fpm.sock;
+    #fastcgi_index index.php;
+    #fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    #fastcgi_intercept_errors on;
+  }
+}

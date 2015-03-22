@@ -1,0 +1,37 @@
+server {
+  listen      unix:/var/run/nginx-backend.sock default;
+  server_name _;
+  root        /var/www/concrete5/web;
+  index       index.php index.html index.htm;
+
+  access_log  /var/log/nginx/backend.access.log backend;
+
+  keepalive_timeout 25;
+  port_in_redirect  off;
+
+  gzip              off;
+  gzip_vary         off;
+
+  #location / {
+  location ~ \.php($|/) {
+  #location ~ \.php$ {
+      #limit_req zone=method;
+      #
+    set $dbg_v "catch by backend";
+    access_log /var/log/nginx/debug.log debug;
+
+    set $proxy_https '';
+    if ( $http_x_forwarded_proto = 'https' ) {
+        set $proxy_https 'on';
+    }
+
+    include /etc/nginx/php-fpm;
+    fastcgi_param  REMOTE_ADDR      $http_x_real_ip;
+    fastcgi_param  HTTPS            $proxy_https  if_not_empty;
+    fastcgi_pass_header "X-Accel-Redirect";
+    fastcgi_pass_header "X-Accel-Buffering";
+    fastcgi_pass_header "X-Accel-Charset";
+    fastcgi_pass_header "X-Accel-Expires";
+    fastcgi_pass_header "X-Accel-Limit-Rate";
+  }
+}

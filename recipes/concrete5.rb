@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: concrete5
-# Recipe:: default
+# Recipe:: concrete5
 #
 # Copyright (C) 2015 Atsushi Nakajyo
 #
@@ -16,22 +16,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe "yum-epel::default"
-
-%w{ zip unzip wget git openssl }.each do | pkg |
-  package pkg do
-    action [:install, :upgrade]
-  end
+directory node['concrete5']['install_dir'] do
+  user  'nginx'
+  group 'nginx'
+  mode  '0755'
+  action :create
 end
 
-# mysql
-include_recipe "concrete5::mysql"
+##git node['concrete5']['install_dir'] do
+##  repository  node['concrete5']['git_repository']
+##  revision    node['concrete5']['git_revision']
+##  user        'nginx'
+##  group       'nginx'
+##  action      :checkout
+##end
 
-# nginx
-include_recipe "concrete5::nginx"
-
-# php
-include_recipe "concrete5::php"
-
-# concrete5
-include_recipe "concrete5::concrete5"
+ark 'web' do
+  url 'http://concrete5-japan.org/files/1114/1982/1355/concrete5.6.3.2.ja.zip'
+  path node['concrete5']['install_dir']
+  owner 'nginx'
+  action :put
+end
